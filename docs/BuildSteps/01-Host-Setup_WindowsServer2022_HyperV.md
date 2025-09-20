@@ -140,6 +140,12 @@ Site-A LAN (172.16.10.0/24)  <--pfSense-A-->  Transit A (10.0.10.0/30)  <--pfSen
 New-VMSwitch -Name "vSwitch-WAN-A" -SwitchType Internal -Notes "WAN transit between Site-A and Core"
 New-VMSwitch -Name "vSwitch-WAN-B" -SwitchType Internal -Notes "WAN transit between Site-B and Core"
 ```
+## Run Script to create Hyper V
+```powershell
+.\scripts\pfsense.provisioning
+```
+Once the execution complete, follow .\doc\pfsense_install.md to complete pfsense installation.
+
 ## Addressing & Gateways
 
 ### pfSense-A (Site-A Firewall)
@@ -175,7 +181,13 @@ New-VMSwitch -Name "vSwitch-WAN-B" -SwitchType Internal -Notes "WAN transit betw
 
 # Challenges & Solutions
 
-## Challenge 1: No cross-site communication
+## Challenge 1: No communication from LAN B and pfSense Core
+- **Root Cause:** Missing firewall rules for Opt1 interface.  
+- **Solution:** Add firewall rule to allow traffic from LAN B   
+- **Evidence:** `tracert` shows B → C → A  
+- **Prevention:** Ensure OPT1 have valid firewall config  
+
+## Challenge 2: No cross-site communication
 - **Root Cause:** Missing static routes on Core  
 - **Solution:** Add routes for both LANs via WAN peers  
 - **Evidence:** `tracert` shows A → C → B  
@@ -183,7 +195,7 @@ New-VMSwitch -Name "vSwitch-WAN-B" -SwitchType Internal -Notes "WAN transit betw
 
 ---
 
-## Challenge 2: Internet unreachable from Site-A/B
+## Challenge 3: Internet unreachable from Site-A/B
 - **Root Cause:** Default GW missing on pfSense-A/B  
 - **Solution:** Set GW = Core IP  
 - **Evidence:** Browsing works from both sites  
@@ -191,7 +203,7 @@ New-VMSwitch -Name "vSwitch-WAN-B" -SwitchType Internal -Notes "WAN transit betw
 
 ---
 
-## Challenge 3: NIC order mismatch
+## Challenge 4: NIC order mismatch
 - **Root Cause:** Hyper-V assigns NICs arbitrarily  
 - **Solution:** Use console interface assignment in pfSense  
 - **Evidence:** `ifconfig` shows correct IPs  
